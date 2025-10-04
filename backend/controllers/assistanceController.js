@@ -93,7 +93,7 @@ export const getAssistanceHistory = async (req, res) => {
         // Consulta SQL que une las tablas asistencia y tipo_asistencia
         // para mostrar el nombre del tipo de asistencia (Entrada/Salida)
         const query = `
-            SELECT a.fecha, a.hora, ta.tipo_asistencia as type
+            SELECT a.asistencia_id, a.fecha, a.hora, ta.tipo_asistencia as type
             FROM asistencia a
             JOIN tipo_asistencia ta ON a.tipo_id = ta.tipo_id
             WHERE a.user_id = ?
@@ -147,7 +147,7 @@ export const deleteAssistanceRecord = async (req, res) => {
         });
     }
     try {
-        const query = 'DELETE FROM asistencia WHERE id = ?';
+        const query = 'DELETE FROM asistencia WHERE asistencia_id = ?';
         const [result] = await pool.execute(query, [id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({

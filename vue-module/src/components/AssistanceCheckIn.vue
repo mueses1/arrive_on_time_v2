@@ -46,6 +46,7 @@
                         <th>Tipo</th>
                         <th>Fecha</th>
                         <th>Hora</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,6 +59,16 @@
                         </td>
                         <td>{{ record.fecha }}</td>
                         <td>{{ record.hora }}</td>
+                        <td>
+                            <button 
+                                @click="deleteRecord(record.asistencia_id, index)" 
+                                :disabled="deletingRecord === record.asistencia_id"
+                                class="btn-delete"
+                                title="Eliminar registro"
+                            >
+                                {{ deletingRecord === record.asistencia_id ? '...' : '🗑️' }}
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -84,6 +95,7 @@ const statusType = ref('');        // Tipo de mensaje ('success' o 'error')
 const actionType = ref('');        // Acción actual ('entrada' o 'salida')
 const history = ref([]);           // Historial de asistencias
 const currentStatus = ref('desconocido'); // Estado actual del empleado
+const deletingRecord = ref(null);     // ID del registro que se está eliminando
 
 
 // ======================
@@ -174,6 +186,55 @@ const getHistory = async () => {
         console.error('Error al obtener el historial:', error);
         history.value = [];
         currentStatus.value = 'desconocido';
+    }
+};
+
+
+// ======================
+// Función: Eliminar Registro de Asistencia
+// ======================
+const deleteRecord = async (recordId, index) => {
+    // Confirmación antes de eliminar
+    if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) {
+        return;
+    }
+
+    // Marcamos el registro como "eliminando"
+    deletingRecord.value = recordId;
+    message.value = '';
+
+    try {
+        // Petición DELETE al backend para eliminar el registro
+        const response = await axios.delete(`${API_URL}/public/attendances/delete/${recordId}`);
+
+        // Si la eliminación es exitosa
+        if (response.data.success) {
+            // Removemos el registro del array local
+            history.value.splice(index, 1);
+            
+            // Actualizamos el estado actual si era el registro más reciente
+            if (index === 0 && history.value.length > 0) {
+                currentStatus.value = history.value[0].type;
+            } else if (history.value.length === 0) {
+                currentStatus.value = 'desconocido';
+            }
+
+            message.value = 'Registro eliminado exitosamente.';
+            statusType.value = 'success';
+        }
+    } catch (error) {
+        // Captura de errores
+        console.error('Error al eliminar el registro:', error);
+        
+        if (error.response && error.response.data && error.response.data.message) {
+            message.value = `ERROR: ${error.response.data.message}`;
+        } else {
+            message.value = 'Error de conexión al eliminar el registro.';
+        }
+        statusType.value = 'error';
+    } finally {
+        // Limpiamos el estado de eliminación
+        deletingRecord.value = null;
     }
 };
 
@@ -286,5 +347,26 @@ input {
 .status-out {
     font-weight: bold;
     color: #721c24;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s, opacity 0.3s;
+}
+
+.btn-delete:hover:not(:disabled) {
+    background-color: #c82333;
+}
+
+.btn-delete:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 </style>
