@@ -72,6 +72,7 @@ export const recordAssistance = async (req, res) => {
     }
 };
 
+
 // ================================================
 // Controlador para consultar el historial de asistencia
 // ================================================
@@ -134,3 +135,4 @@ export const getAssistanceHistory = async (req, res) => {
         });
     }
 };
+
