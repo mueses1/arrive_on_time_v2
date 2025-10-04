@@ -72,6 +72,7 @@ export const recordAssistance = async (req, res) => {
     }
 };
 
+
 // ================================================
 // Controlador para consultar el historial de asistencia
 // ================================================
@@ -134,6 +135,7 @@ export const getAssistanceHistory = async (req, res) => {
         });
     }
 };
+
 
 // controlador para eliminar una asistencia
 export const deleteAssistanceRecord = async (req, res) => {
