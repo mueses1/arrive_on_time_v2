@@ -134,3 +134,34 @@ export const getAssistanceHistory = async (req, res) => {
         });
     }
 };
+
+// controlador para eliminar una asistencia
+export const deleteAssistanceRecord = async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: 'Falta el ID del registro de asistencia.'
+        });
+    }
+    try {
+        const query = 'DELETE FROM asistencia WHERE id = ?';
+        const [result] = await pool.execute(query, [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Registro de asistencia no encontrado.'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: 'Registro de asistencia eliminado exitosamente.'
+        });
+    } catch (error) {
+        console.error('Error al eliminar el registro de asistencia:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor al eliminar el registro.'
+        });
+    }
+};
